@@ -132,4 +132,67 @@ If you dont need wifi or the vpu working, you can stop now, insert the usb stick
 Else, continue following the tutorial
 
 ## Install libhybris
-This part of the turial is still beeing studied. The devellopers commit thenselves to solve the problem soon
+Thanks to the great contribution of mac-l1, there is currently a .deb package that can be found [here](http://mac-l1.com/). Since a .deb package is not an ArchLinux dedicated package, it's necessary to generate a tarball from the .deb package. There are many programs that do this job, like [Alien](https://joeyh.name/code/alien/)
+
+After the conversion is done, just use the provided script `setup_machybris` or unpack and copy all machybris files to the arch linux root filesystem. This can be done with:
+```bash
+mkdir machybris
+tar zxf path/to/tgz/machybris -C machybris
+rsync --exclude=etc/init -abviuzP machybris/* path/to/arch/linux/rfs
+sync
+umount path/to/arch/linux/rfs
+```
+
+For enabling the wifi module, we need to create an special unit file for systemd. Create a file called `wifi.service` and place it at `path/to/arch/linux/rfs/etc/systemd/system/`. Now, copy the following information under this file
+```bash
+[Unit]
+Description=wifi
+After=libhybris.service
+
+[Service]
+ExecStart=/usr/local/bin/wifi-on.sh
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now, we need to create the script that will actually load the driver. Create a file called `wifi-on.sh` and place it at `path/to/arch/linux/rfs/usr/local/bin/` containing the following code:
+```bash
+# turn on wifi
+while [ ! -f /sys/class/rkwifi/power ]
+do
+    sleep 1
+done
+    
+echo 1 > /sys/class/rkwifi/power
+
+# load module
+while [ ! -f /sys/class/rkwifi/driver ]
+do
+    sleep 1
+done
+
+echo 1 > /sys/class/rkwifi/driver
+```
+
+Now, just unplug the USB stick from your computer, plug it in your firefly with you SD card and turn it on. 
+
+You should now see the console. Loggin with user and password "root".
+
+After beeing logged in, we need to enable libhybris with systemd
+```bash
+systemctl enable libhybris
+systemctl enable android-logd
+systemctl enable android-mediaserver
+systemctl enable android-servicemanager
+systemctl enable fbset
+systemctl enable wifi
+```
+
+reboot so the changes take place with `reboot`.
+
+Your firefly is configured and running ArchLinux ! \o/
+
+Any suggestion and/or improvement, please fork me ! :)
