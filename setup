@@ -60,6 +60,8 @@ MKBOOTIMG_DIR=rockchip-mkbootimg
 RK2918_GIT=https://github.com/dayongxie/rk2918_tools.git
 RK2918_DIR=rk2918_tools
 
+#old kernel version 3.10 won't work with gcc5 and above
+#hence use the arm-eabi-4.6
 CROSS_COMPILER_REP=https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/+archive/refs/tags/android-4.4.2_r1.tar.gz
 CROSS_COMPILER_DIR=android-4.4.2_r1
 CROSS_COMPILER_TAR=android-4.4.2_r1.tar.gz
