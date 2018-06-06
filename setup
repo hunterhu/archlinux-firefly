@@ -185,6 +185,7 @@ setup_source()
 setup_all()
 {
     setup_tools
+    setup_source
     setup_kernel
     setup_ramdisk
     setup_boot_img
@@ -212,6 +213,7 @@ options:
     elif [ "$1" == "boot_img" ]; then setup_boot_img;
     elif [ "$1" == "source" ]; then setup_source;
     elif [ "$1" == "create_sdcard" ]; then setup_create_sdcard;
+    elif [ "$1" == "all" ]; then setup_all;
     else
         echo "$HELP"
         exit
