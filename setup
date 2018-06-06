@@ -71,11 +71,11 @@ MKBOOTIMG_TOOL=mkbootimg
 
 ################################################################################
 # Create SDCard variables
-CREATE_SDCARD_USB_DIR=create-linux-sdcard-usb
-CREATE_SDCARD_USB_BIN=create-linux-sdcard-usb
-CREATE_SDCARD_USB_KERNEL_IMG=kernel-linux.img
-CREATE_SDCARD_USB_BOOT_IMG=boot-linux.img
-CREATE_SDCARD_USB_RESOURCE_IMG=resource-linux.img
+CREATE_SDCARD_DIR=create-linux-sdcard
+CREATE_SDCARD_BIN=create-linux-sdcard
+CREATE_SDCARD_KERNEL_IMG=kernel-linux.img
+CREATE_SDCARD_BOOT_IMG=boot-linux.img
+CREATE_SDCARD_RESOURCE_IMG=resource-linux.img
 
 ################################################################################
 setup_tools()
@@ -157,16 +157,16 @@ setup_boot_img()
 }
 
 ################################################################################
-setup_create_sdcard_usb()
+setup_create_sdcard()
 {
-    echo 'Setting up sdcard usb'
-    cd $HOME_DIR/$CREATE_SDCARD_USB_DIR
+    echo 'Setting up sdcard'
+    cd $HOME_DIR/$CREATE_SDCARD_DIR
 
-    ln -sf $HOME_DIR/$BOOT_IMG_DIR/$BOOT_IMG_IMG ./$CREATE_SDCARD_USB_BOOT_IMG
-    ln -sf $HOME_DIR/$KERNEL_DIR/$KERNEL_IMG ./$CREATE_SDCARD_USB_KERNEL_IMG
-    ln -sf $HOME_DIR/$KERNEL_DIR/$RESOURCE_IMG ./$CREATE_SDCARD_USB_RESOURCE_IMG
+    ln -sf $HOME_DIR/$BOOT_IMG_DIR/$BOOT_IMG_IMG ./$CREATE_SDCARD_BOOT_IMG
+    ln -sf $HOME_DIR/$KERNEL_DIR/$KERNEL_IMG ./$CREATE_SDCARD_KERNEL_IMG
+    ln -sf $HOME_DIR/$KERNEL_DIR/$RESOURCE_IMG ./$CREATE_SDCARD_RESOURCE_IMG
 
-    sudo ./$CREATE_SDCARD_USB_BIN 
+    sudo ./$CREATE_SDCARD_BIN
 
     cd $HOME_DIR
 }
@@ -185,7 +185,7 @@ setup_all()
     setup_kernel
     setup_ramdisk
     setup_boot_img
-    setup_create_sdcard_usb
+    setup_create_sdcard
 }
 
 ################################################################################
@@ -200,7 +200,7 @@ options:
     ramdisk - to generate initial ramdisk image
     boot_img - to generate boot image
     source - to source tool's paths
-    create_sdcard_usb - to create sd card
+    create_sdcard - to create sd card
     all - to chain all of the steps and create an sdcard with a working kernel and resource images"
 
     if [ "$1" == "tools" ]; then setup_tools;
@@ -208,7 +208,7 @@ options:
     elif [ "$1" == "ramdisk" ]; then setup_ramdisk;
     elif [ "$1" == "boot_img" ]; then setup_boot_img;
     elif [ "$1" == "source" ]; then setup_source;
-    elif [ "$1" == "create_sdcard_usb" ]; then setup_create_sdcard_usb;
+    elif [ "$1" == "create_sdcard" ]; then setup_create_sdcard;
     else
         echo "$HELP"
         exit
