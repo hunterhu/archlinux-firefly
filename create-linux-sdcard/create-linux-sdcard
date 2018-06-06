@@ -29,7 +29,7 @@ CTRL_C()
 {
 	cd ${WORKING_DIR}
 	echo
-	echo "$0: Linux SD card creation interrupted ... exiting."
+	echo "Linux SD card creation interrupted ... exiting."
 	exit
 }
 
@@ -38,7 +38,7 @@ ERROR()
 	cd ${WORKING_DIR}
 	ERROR_MESSAGE=$*
 	echo
-	echo "$0: ${ERROR_MESSAGE} ... exiting."
+	echo "${ERROR_MESSAGE} ... exiting."
 	exit
 }
 
@@ -68,7 +68,7 @@ START()
 	fi
 	NECESSARY=true
 	while ${NECESSARY}; do
-		echo -n "$0: Is your SD card loaded as '${SDCARD}' (y/n)? "
+		echo -n "Is your SD card loaded as '${SDCARD}' (y/n)? "
 		read -n 1 ANSWER
 		echo
 		if [ "${ANSWER}" = "y" ]; then
@@ -78,60 +78,78 @@ START()
 				break
 			fi
 		else
-			echo -n "$0: Do you want to use a different device? "
+			echo -n "Do you want to use a different device? "
 			read -n 1 ANSWER
 			echo
 			if [ "${ANSWER}" = "y" -o -z "${ANSWER}" ]; then
-				echo -n "$0: Enter new device name? "
+				echo -n "Enter new device name? "
 				read SDCARD
 			else
 				ERROR "Linux SD card creation terminated"
 			fi
 		fi
 	done
-	echo -n "$0: Unmounting partitions on '${SDCARD}' ... "
-	umount ${SDCARD}? > /dev/null 2>&1
+	echo -n "Unmounting partitions on '${SDCARD}' ... "
+	umount ${SDCARD}?
+	echo
 	echo "done."
+	echo
 }
 
 FLASH_BOOTLOADER_TO_SDCARD()
 {
-	echo -n "$0: Formatting SD card '${SDCARD}' ... "
+	echo -n "Formatting SD card '${SDCARD}' ... "
 	cd ${WORKING_DIR}
-	sgdisk -Z ${SDCARD} > /dev/null 2>&1
+	sgdisk -Z ${SDCARD}
+	echo
 	echo "done."
-	echo -n "$0: Flashing bootloader '`basename ${SDBOOT}`' to '${SDCARD}' ... "
-	dd if=${SDBOOT} of=${SDCARD} conv=sync,fsync > /dev/null 2>&1
+	echo
+	echo -n "Flashing bootloader '`basename ${SDBOOT}`' to '${SDCARD}' ... "
+	dd if=${SDBOOT} of=${SDCARD} conv=sync,fsync
+	echo
 	echo "done."
-	echo -n "$0: Updating partition table on '${SDCARD}' ... "
-	sgdisk -og ${SDCARD} > /dev/null 2>&1
+	echo
+	echo -n "Updating partition table on '${SDCARD}' ... "
+	sgdisk -og ${SDCARD}
+	echo
 	echo "done."
+	echo
 }
 
 FLASH_LINUX_OS_TO_SDCARD()
 {
 	cd ${WORKING_DIR}
-        echo -n "$0: Creating '${PARAMETER_IMAGE}' from '${PARAMETER_FILE}' ... "
+        echo -n "Creating '${PARAMETER_IMAGE}' from '${PARAMETER_FILE}' ... "
         PARAMETER_IMAGE_CREATED=false
-        rm -rf ${PARAMETER_IMAGE} > /dev/null 2>&1
+        rm -rf ${PARAMETER_IMAGE}
         ${RKCRC} -p ${PARAMETER_FILE} ${PARAMETER_IMAGE} && PARAMETER_IMAGE_CREATED=true
+        echo
         echo "done."
+        echo
         if ${PARAMETER_IMAGE_CREATED}; then
-		echo -n "$0: Flashing parameter '${PARAMETER_IMAGE}' to '${SDCARD}' ... "
-		dd if=${PARAMETER_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000)) > /dev/null 2>&1
+		echo -n "Flashing parameter '${PARAMETER_IMAGE}' to '${SDCARD}' ... "
+		dd if=${PARAMETER_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000))
+        echo
 		echo "done."
+        echo
         else
                 ERROR "Cannot create '${PARAMETER_IMAGE}'"
         fi
-	echo -n "$0: Flashing boot '${BOOT_IMAGE}' to '${SDCARD}' ... "
-	dd if=${BOOT_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+BOOT_START_PARTITION)) > /dev/null 2>&1
+	echo -n "Flashing boot '${BOOT_IMAGE}' to '${SDCARD}' ... "
+	dd if=${BOOT_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+BOOT_START_PARTITION))
+    echo
 	echo "done."
-	echo -n "$0: Flashing kernel '${KERNEL_IMAGE}' to '${SDCARD}' ... "
-	dd if=${KERNEL_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+KERNEL_START_PARTITION)) > /dev/null 2>&1
+    echo
+	echo -n "Flashing kernel '${KERNEL_IMAGE}' to '${SDCARD}' ... "
+	dd if=${KERNEL_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+KERNEL_START_PARTITION))
+    echo
 	echo "done."
-	echo -n "$0: Flashing resource '${RESOURCE_IMAGE}' to '${SDCARD}' ... "
-	dd if=${RESOURCE_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+RESOURCE_START_PARTITION)) > /dev/null 2>&1
+    echo
+	echo -n "Flashing resource '${RESOURCE_IMAGE}' to '${SDCARD}' ... "
+	dd if=${RESOURCE_IMAGE} of=${SDCARD} conv=sync,fsync seek=$((0x2000+RESOURCE_START_PARTITION))
+    echo
 	echo "done."
+    echo
 }
 
 CALCULATE_PARTITIONS_FOR_SDCARD()
@@ -174,11 +192,13 @@ CALCULATE_PARTITIONS_FOR_SDCARD()
 
 FINISH()
 {
-	echo -n "$0: Flushing buffers for '${SDCARD}' ... "
+	echo -n "Flushing buffers for '${SDCARD}' ... "
 	sync
 	sync
+    echo
 	echo "done."
-        echo "$0: Linux SD card created on '${SDCARD}'."
+    echo
+        echo "Linux SD card created on '${SDCARD}'."
 }
 
 trap CTRL_C SIGINT
