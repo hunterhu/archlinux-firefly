@@ -24,6 +24,8 @@ PARAMETER_IMAGE=parameter-linux.img
 BOOT_IMAGE=boot-linux.img
 KERNEL_IMAGE=kernel-linux.img
 RESOURCE_IMAGE=resource-linux.img
+LINUX_RFS=rootfs.tar.bz2
+RFS_DIR=rootfs
 
 CTRL_C()
 {
@@ -59,6 +61,9 @@ START()
 	fi
 	if [ ! -f "${RESOURCE_IMAGE}" ]; then
 		ERROR "Linux image '${RESOURCE_IMAGE}' not found"
+	fi
+	if [ ! -f "${LINUX_RFS}" ]; then
+		ERROR "Linux image '${LINUX_RFS}' not found"
 	fi
 	if [ ! -f ${RKCRC} ]; then
 		ERROR "Missing system tool '${RKCRC}'"
@@ -152,29 +157,33 @@ FLASH_LINUX_OS_TO_SDCARD()
     echo
 }
 
-CALCULATE_PARTITIONS_FOR_SDCARD()
+CREATE_PARTITIONS_ON_SDCARD()
 {
-	echo -n "$0: Calculating partition size for '${SDCARD}' ... "
+	echo -n "Calculating partition size for '${SDCARD}' ... "
+    echo
 	cd ${WORKING_DIR}
 	for PARTITION in `cat ${PARAMETER_FILE} | grep '^CMDLINE' | sed 's/ //g' | sed 's/.*:\(0x.*[^)])\).*/\1/' | sed 's/,/ /g'`; do
-        	PARTITION_NAME=`echo ${PARTITION} | sed 's/\(.*\)(\(.*\))/\2/'`
-        	START_PARTITION=`echo ${PARTITION} | sed 's/.*@\(.*\)(.*)/\1/'`
-        	LENGTH_PARTITION=`echo ${PARTITION} | sed 's/\(.*\)@.*/\1/'`
+	PARTITION_NAME=`echo ${PARTITION} | sed 's/\(.*\)(\(.*\))/\2/'`
+    echo $PARTITION_NAME
+	START_PARTITION=`echo ${PARTITION} | sed 's/.*@\(.*\)(.*)/\1/'`
+    echo "Start : $START_PARTITION"
+	LENGTH_PARTITION=`echo ${PARTITION} | sed 's/\(.*\)@.*/\1/'`
+    echo "Length: $LENGTH_PARTITION"
 		case ${PARTITION_NAME} in
 			"boot")
 					BOOT_PARTITION=true
-                			BOOT_START_PARTITION=${START_PARTITION}
-                			BOOT_LENGTH_PARTITION=${LENGTH_PARTITION}
+			BOOT_START_PARTITION=${START_PARTITION}
+			BOOT_LENGTH_PARTITION=${LENGTH_PARTITION}
 					;;
 			"kernel")
 					KERNEL_PARTITION=true
-                			KERNEL_START_PARTITION=${START_PARTITION}
-                			KERNEL_LENGTH_PARTITION=${LENGTH_PARTITION}
+			KERNEL_START_PARTITION=${START_PARTITION}
+			KERNEL_LENGTH_PARTITION=${LENGTH_PARTITION}
 					;;
 			"resource")
 					RESOURCE_PARTITION=true
-                			RESOURCE_START_PARTITION=${START_PARTITION}
-                			RESOURCE_LENGTH_PARTITION=${LENGTH_PARTITION}
+			RESOURCE_START_PARTITION=${START_PARTITION}
+			RESOURCE_LENGTH_PARTITION=${LENGTH_PARTITION}
 					;;
 			*)
 					;;
@@ -182,12 +191,43 @@ CALCULATE_PARTITIONS_FOR_SDCARD()
 	done
 	for PARTITION in BOOT KERNEL RESOURCE
 	do
-        	eval PARTITION_EXISTS=${PARTITION}_PARTITION
-        	if ! ${!PARTITION_EXISTS}; then
-                	ERROR "Linux's parameter file missing '`echo ${PARTITION} | tr '[:upper:]' '[:lower:]'`' partition definition"
-        	fi
+	eval PARTITION_EXISTS=${PARTITION}_PARTITION
+	if ! ${!PARTITION_EXISTS}; then
+	ERROR "Linux's parameter file missing '`echo ${PARTITION} | tr '[:upper:]' '[:lower:]'`' partition definition"
+	fi
 	done
+    echo
 	echo "done."
+    echo
+	PARTITION_NUMBER=1
+	PARTITION=LINUX
+	START_OF_PARTITION=$(((0x2000+0x2000+BOOT_LENGTH_PARTITION+KERNEL_LENGTH_PARTITION+RESOUCE_LENGTH_PARTITION)*512/1024/1024))
+    echo "Start of Linux partition: $START_OF_PARTITION MB"
+	echo -n "Creating '`echo ${PARTITION} | tr '[:upper:]' '[:lower:]'`' partition as '${SDCARD}${PARTITION_NUMBER}' on ${SDCARD} ..."
+	sgdisk -n ${PARTITION_NUMBER}:${START_OF_PARTITION}M: -t ${PARTITION_NUMBER}:8300 ${SDCARD}
+    echo
+	echo "done."
+    echo
+	echo -n "Making 'ext4' file system for '`echo ${PARTITION} | tr '[:upper:]' '[:lower:]'`' partition on '${SDCARD}${PARTITION_NUMBER}' ... "
+	mkfs.ext4 -F -L linuxroot ${SDCARD}${PARTITION_NUMBER}
+    echo
+	echo "done."
+    echo
+}
+
+FLASH_LINUX_RFS_TO_SDCARD()
+{
+	echo -n "Extracting Linux RFS '${LINUX_RFS}' to '${SDCARD}${PARTITION_NUMBER}' ... "
+	cd ${WORKING_DIR}
+    if [ ! -d $RFS_DIR ]; then mkdir $RFS_DIR; fi
+    mount ${SDCARD}${PARTITION_NUMBER} $RFS_DIR
+    tar jxf $LINUX_RFS -C $RFS_DIR
+    sync
+    umount $RFS_DIR
+
+    echo
+	echo "done."
+    echo
 }
 
 FINISH()
@@ -196,15 +236,19 @@ FINISH()
 	sync
 	sync
     echo
+	echo -n "Ejecting '${SDCARD}' ... "
+    eject ${SDCARD}
+    echo
 	echo "done."
     echo
-        echo "Linux SD card created on '${SDCARD}'."
+    echo "Linux SD card created on '${SDCARD}'."
 }
 
 trap CTRL_C SIGINT
 
 START $*
 FLASH_BOOTLOADER_TO_SDCARD
-CALCULATE_PARTITIONS_FOR_SDCARD
+CREATE_PARTITIONS_ON_SDCARD
 FLASH_LINUX_OS_TO_SDCARD
+FLASH_LINUX_RFS_TO_SDCARD
 FINISH
