@@ -21,7 +21,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # @brief
 #
 #
@@ -85,13 +85,13 @@ setup_tools()
 {
     echo 'Setting up tools'
     cd $HOME_DIR
-    
+
     # Create Binaries folder
     if [ ! -d $BIN_DIR ]; then mkdir $BIN_DIR; fi
     cd $BIN_DIR
 
     # Fetch and install mkbootimg
-    if [ ! -d $MKBOOTIMG_DIR ]; then git clone $MKBOOTIMG_GIT $MKBOOTIMG_DIR; fi 
+    if [ ! -d $MKBOOTIMG_DIR ]; then git clone $MKBOOTIMG_GIT $MKBOOTIMG_DIR; fi
     cd $MKBOOTIMG_DIR
     make
     cd $HOME_DIR/$BIN_DIR
@@ -99,7 +99,7 @@ setup_tools()
     # Fetch rk2918 tools
     if [ ! -d $RK2918_DIR ]; then git clone $RK2918_GIT $RK2918_DIR; fi
     cd $RK2918_DIR
-    make 
+    make
     cd $HOME_DIR/$BIN_DIR
 
     # Dowload ARM eabi cross compilling toolchain
@@ -109,7 +109,7 @@ setup_tools()
 
     cd $HOME_DIR
     source ./source $HOME_DIR $BIN_DIR
-    
+
     cd $HOME_DIR
 }
 
@@ -129,7 +129,7 @@ setup_kernel()
     [ -d $MODULES_INSTALL_PATH ] && rm -rf $MODULES_INSTALL_PATH
     mkdir $MODULES_INSTALL_PATH
     make INSTALL_MOD_PATH=./$MODULES_INSTALL_PATH modules_install
-    
+
     cd $HOME_DIR
 }
 
@@ -138,7 +138,7 @@ setup_ramdisk()
 {
     echo 'Setting up ramdisk'
     cd $HOME_DIR
-    
+
     if [ ! -d $RAMDISK_DIR ]; then git clone $RAMDISK_GIT $RAMDISK_DIR; fi
     make -C $RAMDISK_DIR
 
