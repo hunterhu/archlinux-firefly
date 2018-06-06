@@ -1,4 +1,4 @@
-# Creaet a Firefly-rk3288 SD card
+# Create a Firefly-rk3288 SD card
 
 ```bash
 ./setup all
