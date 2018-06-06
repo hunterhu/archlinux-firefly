@@ -1,6 +1,11 @@
 #!/bin/bash
 
-# Linuxium's script to create a bootable SD card for Linux with RFS on USB for RK3288 devices
+# Linuxium's script to create a bootable SD card with Linux for RK3288 devices
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script has to run as root"
+    exit
+fi
 
 SDCARD="/dev/sdb"
 
