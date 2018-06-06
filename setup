@@ -39,6 +39,7 @@ RAMDISK_DIR=initrd
 # Kernel variables
 COMPILLING_THREADS=10 # Threads to use during compliation
 
+#for Linux(also Android), 3.10 is the kernel version; 3.14 is for ChromeOS
 KERNEL_GIT=https://bitbucket.org/T-Firefly/firefly-rk3288-kernel.git
 KERNEL_DIR=firefly-rk3288-kernel
 KERNEL_IMG=kernel.img
