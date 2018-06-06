@@ -2,7 +2,7 @@
 
 # Linuxium's script to create a bootable SD card for Linux with RFS on USB for RK3288 devices
 
-SDCARD="/dev/sdc"
+SDCARD="/dev/sdb"
 
 WORKING_DIR=`pwd`
 TOOLS_DIR=${WORKING_DIR}/Tools
