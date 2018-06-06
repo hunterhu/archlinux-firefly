@@ -10,7 +10,7 @@ For details of how every step is done see the setup script itself.
 # Prepare RK3288 bootloader
 
 In order to let RK3288 boot from SD card, you will need a later bootloader
-version; try boot the sdcard you created, if not booting, flash this one that I
+version; try boot the sdcard you created, if not , flash the one that I
 have included in the repo:
 
 ```bash
@@ -32,9 +32,13 @@ To enter Loader mode, make the bootloader aware that the RECOVERY key is pressed
 and USB cable is connected:
 
 1.Keep device power on.
+
 2.Use micro USB OTG cable to connect host and device together.
+
 3.Press and hold RECOVERY key.
+
 4.Shortly press RESET key.
+
 5.Release RECOVERY key.
 
 ## MaskRom Mode
@@ -51,7 +55,8 @@ http://en.t-firefly.com/doc/product/info/401.html
 ## Flash the bootloader
 
 I have include the v1.33 Linux upgrade_tool, after entering loader mode or
-Maskrom mode, do the following on your board:
+Maskrom mode, do the following on your 32-bit development Linux host (e.g. Ubuntu
+16.04):
 
 ```bash
 sudo ./upgrade_tool ul RK3288Loader_uboot_V2.17.02.bin
